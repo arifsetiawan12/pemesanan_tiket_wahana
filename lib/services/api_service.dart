@@ -7,7 +7,7 @@ import '../models/customer_model.dart';
 
 class ApiService {
   static const String baseUrl =
-      "http://192.168.1.39:8000/api_laravel_backend/public/api";
+      "http://172.20.10.2:8000/api_laravel_backend/public/api";
 
   /// Ambil semua data wahana
   Future<List<Wahana>> getWahana() async {

@@ -61,8 +61,8 @@ class _WahanaHomeScreenState extends State<WahanaHomeScreen> {
                   leading: CircleAvatar(
                     radius: 30,
                     backgroundImage: (wahana.foto != null && wahana.foto!.isNotEmpty)
-                        ? NetworkImage(wahana.foto!)
-                        : const AssetImage('assets/default_image.png'),
+                        ? NetworkImage('https://yourdomain.com/storage/${wahana.foto}')
+                        : const AssetImage('assets/default_image.png') as ImageProvider,
                   ),
                   title: Text(
                     wahana.namaWahana ?? 'Nama tidak tersedia',

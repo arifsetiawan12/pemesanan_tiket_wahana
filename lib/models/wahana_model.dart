@@ -4,48 +4,29 @@
 
 class Wahana {
   final int id;
-  final String? kodeWahana; // kode_wahana
-  final String? namaWahana; // nama_wahana
-  final String? deskripsi; // deskripsi
-  final double? hargaTiket; // harga_tiket
-  final String? foto; // foto
-  final String createdAt;
-  final String updatedAt;
+  final String kodeWahana;
+  final String namaWahana;
+  final String deskripsi;
+  final int hargaTiket;
+  final String foto;
 
   Wahana({
     required this.id,
-    this.kodeWahana,
-    this.namaWahana,
-    this.deskripsi,
-    this.hargaTiket,
-    this.foto,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.kodeWahana,
+    required this.namaWahana,
+    required this.deskripsi,
+    required this.hargaTiket,
+    required this.foto,
   });
 
   factory Wahana.fromJson(Map<String, dynamic> json) {
     return Wahana(
-      id: json['id'] ?? 0,
-      kodeWahana: json['kode_wahana'] ?? '',
-      namaWahana: json['nama_wahana'] ?? '',
-      deskripsi: json['deskripsi'] ?? '',
-      hargaTiket:
-          json['harga_tiket'] != null
-              ? double.tryParse(json['harga_tiket'].toString())
-              : null,
-      foto: json['foto'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      updatedAt: json['updated_at'] ?? '',
+      id: json['id'],
+      kodeWahana: json['kode_wahana'],
+      namaWahana: json['nama_wahana'],
+      deskripsi: json['deskripsi'],
+      hargaTiket: json['harga_tiket'],
+      foto: json['foto'],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'kode_wahana': kodeWahana,
-      'nama_wahana': namaWahana,
-      'deskripsi': deskripsi,
-      'harga_tiket': hargaTiket,
-      'foto': foto,
-    };
   }
 }

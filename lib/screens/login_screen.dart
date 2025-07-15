@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'register_screen.dart';
+import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -9,14 +11,43 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool rememberMe = false;
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void dispose() {
-    usernameController.dispose();
+    emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _login() async {
+    setState(() { isLoading = true; });
+    final api = ApiService();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    try {
+      final result = await api.login(email, password);
+      if (result['success'] == true) {
+        final token = result['data']['token'];
+        await api.saveToken(token);
+        Navigator.pushReplacementNamed(context, '/home');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login berhasil!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Login gagal!')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
+    } finally {
+      setState(() { isLoading = false; });
+    }
   }
 
   @override
@@ -50,14 +81,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                // Nama User
-                const Text('Nama User'),
+                // Email
+                const Text('Email'),
                 const SizedBox(height: 8),
                 TextField(
-                  controller: usernameController,
+                  controller: emailController,
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.account_circle, color: Colors.purple),
-                    hintText: 'Nama User',
+                    prefixIcon: Icon(Icons.email, color: Colors.purple),
+                    hintText: 'Email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                     ),
@@ -118,25 +149,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    onPressed: () {
-                      String username = usernameController.text.trim();
-                      String password = passwordController.text;
-
-                      if (username == 'admin' && password == 'admin123') {
-                        Navigator.pushReplacementNamed(context, '/home');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Login berhasil!')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Username atau password salah!')),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
+                    onPressed: isLoading ? null : _login,
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Login',
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -190,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text('Belum punya akun? '),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, '/register');
+                        Navigator.of(context).push(_createRouteToRegister());
                       },
                       child: const Text(
                         'Daftar sini',
@@ -210,4 +229,20 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+Route _createRouteToRegister() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => RegisterScreen(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 } 

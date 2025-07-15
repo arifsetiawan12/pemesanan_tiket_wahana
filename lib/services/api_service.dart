@@ -1,57 +1,87 @@
 import 'dart:convert';
-import 'dart:io'; // Wajib untuk menangani SocketException
 import 'dart:async'; // Wajib untuk menangani TimeoutException
 import 'package:http/http.dart' as http;
 import '../models/wahana_model.dart';
 import '../models/customer_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl =
-      "http://172.20.10.2:8000/api_laravel_backend/public/api";
+  static const String baseUrl = 'https://yourdomain.com/api';
 
-  /// Ambil semua data wahana
-  Future<List<Wahana>> getWahana() async {
-    try {
-      final response = await http.get(Uri.parse('$baseUrl/wahana'));
-
-      if (response.statusCode == 200) {
-        List jsonResponse = json.decode(response.body);
-        return jsonResponse.map((data) => Wahana.fromJson(data)).toList();
-      } else {
-        print('Error getWahana:  [31m${response.statusCode} - ${response.body} [0m');
-        throw Exception('Gagal memuat data wahana');
-      }
-    } on SocketException {
-      throw Exception('Tidak ada koneksi internet');
-    } on TimeoutException {
-      throw Exception('Permintaan waktu habis');
-    } catch (e) {
-      print('Exception getWahana: $e');
-      rethrow;
-    }
+  // Registrasi
+  Future<Map<String, dynamic>> register(String name, String email, String password, String passwordConfirmation) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      }),
+    );
+    return jsonDecode(response.body);
   }
 
-  /// Register customer baru
+  // Login
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+    return jsonDecode(response.body);
+  }
+
+  // Get User Profile
+  Future<User> getUser(String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    return User.fromJson(jsonDecode(response.body));
+  }
+
+  // Get List Wahana
+  Future<List<Wahana>> getWahana() async {
+    final response = await http.get(Uri.parse('$baseUrl/wahana'));
+    final List data = jsonDecode(response.body);
+    return data.map((json) => Wahana.fromJson(json)).toList();
+  }
+
+  // Get Detail Wahana
+  Future<Wahana> getWahanaDetail(int id) async {
+    final response = await http.get(Uri.parse('$baseUrl/wahana/$id'));
+    return Wahana.fromJson(jsonDecode(response.body));
+  }
+
+  // Tambahkan method registerCustomer
   Future<bool> registerCustomer(Customer customer) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/customer'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(customer.toJson()),
-      );
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        return true;
-      } else {
-        print('Error registerCustomer:  [31m${response.statusCode} - ${response.body} [0m');
-        return false;
-      }
-    } on SocketException {
-      throw Exception('Tidak ada koneksi internet');
-    } on TimeoutException {
-      throw Exception('Permintaan waktu habis');
-    } catch (e) {
-      print('Exception registerCustomer: $e');
-      return false;
-    }
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'name': customer.namacustomer,
+        'username': customer.username,
+        'email': customer.email,
+        'password': customer.password,
+        'nohp': customer.nohp,
+        'alamat': customer.alamat,
+      }),
+    );
+    final data = jsonDecode(response.body);
+    return data['success'] == true;
+  }
+
+  // Fungsi simpan token
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
+
+  // Fungsi ambil token
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
   }
 }

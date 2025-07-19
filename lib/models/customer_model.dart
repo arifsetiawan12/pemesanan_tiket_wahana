@@ -1,6 +1,3 @@
-/// customer_model.dart
-/// Model data Customer untuk aplikasi Flutter.
-
 class Customer {
   final String namacustomer;
   final String username;

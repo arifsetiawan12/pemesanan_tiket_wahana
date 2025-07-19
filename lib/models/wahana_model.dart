@@ -1,7 +1,3 @@
-/// wahana_model.dart
-/// Model data Wahana untuk aplikasi Flutter.
-/// Mencerminkan field pada tabel 'wahanas' di database Laravel.
-
 class Wahana {
   final int id;
   final String kodeWahana;

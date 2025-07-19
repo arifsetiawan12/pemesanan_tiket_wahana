@@ -1,10 +1,54 @@
 import 'package:flutter/material.dart';
 import '../models/wahana_model.dart';
 import '../services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'wahana_add_screen.dart';
 // import 'wahana_edit_screen.dart';
 
+class WahanaDetailScreen extends StatelessWidget {
+  final Wahana wahana;
+  const WahanaDetailScreen({super.key, required this.wahana});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(wahana.namaWahana)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: wahana.foto.isNotEmpty
+                  ? Hero(
+                      tag: 'wahana_foto_${wahana.id}',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          'http://192.168.1.32:8000/storage/${wahana.foto}',
+                          height: 180,
+                        ),
+                      ),
+                    )
+                  : const Icon(Icons.image, size: 120),
+            ),
+            const SizedBox(height: 16),
+            Text('Nama: ${wahana.namaWahana}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('Kode: ${wahana.kodeWahana}'),
+            const SizedBox(height: 8),
+            Text('Harga Tiket: Rp ${wahana.hargaTiket.toStringAsFixed(0)}'),
+            const SizedBox(height: 8),
+            Text('Deskripsi: ${wahana.deskripsi}'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class WahanaHomeScreen extends StatefulWidget {
+  const WahanaHomeScreen({super.key});
   @override
   _WahanaHomeScreenState createState() => _WahanaHomeScreenState();
 }
@@ -32,6 +76,17 @@ class _WahanaHomeScreenState extends State<WahanaHomeScreen> {
         centerTitle: true,
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: refreshData),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('token');
+              await prefs.remove('customer');
+              if (!mounted) return;
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
         ],
       ),
       body: FutureBuilder<List<Wahana>>(
@@ -40,7 +95,7 @@ class _WahanaHomeScreenState extends State<WahanaHomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(child: Text("Error:  ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text("Tidak ada data wahana."));
           }
@@ -50,133 +105,91 @@ class _WahanaHomeScreenState extends State<WahanaHomeScreen> {
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
               final wahana = snapshot.data![index];
-
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 3,
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: (wahana.foto != null && wahana.foto!.isNotEmpty)
-                        ? NetworkImage('https://yourdomain.com/storage/${wahana.foto}')
-                        : const AssetImage('assets/default_image.png') as ImageProvider,
-                  ),
-                  title: Text(
-                    wahana.namaWahana ?? 'Nama tidak tersedia',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              return TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: Duration(milliseconds: 400 + index * 80),
+                builder: (context, value, child) {
+                  return Opacity(
+                    opacity: value,
+                    child: Transform.scale(
+                      scale: 0.95 + 0.05 * value,
+                      child: child,
                     ),
+                  );
+                },
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-
-                      // Baris harga dengan ikon
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: Colors.black, // ganti sesuai tema
-                          ),
-                          SizedBox(width: 8), // jarak antara ikon dan teks
-                          Expanded(
-                            child: Text(
-                              'Harga : Rp ${wahana.hargaTiket?.toStringAsFixed(0) ?? "0"}',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
+                  elevation: 6,
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  color: Colors.white,
+                  shadowColor: Colors.blue.withOpacity(0.15),
+                  child: ListTile(
+                    leading: Hero(
+                      tag: 'wahana_foto_${wahana.id}',
+                      child: CircleAvatar(
+                        radius: 32,
+                        backgroundColor: Colors.blue.shade50,
+                        backgroundImage: wahana.foto.isNotEmpty
+                            ? NetworkImage('http://192.168.1.32:8000/storage/${wahana.foto}')
+                            : const AssetImage('assets/default_image.png') as ImageProvider,
                       ),
-
-                      SizedBox(height: 4), // jarak antar baris
-                      // Baris deskripsi dengan ikon
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.circle, size: 8, color: Colors.black),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Deskripsi : ${wahana.deskripsi ?? ""}',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
+                    ),
+                    title: Text(
+                      wahana.namaWahana,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.blueAccent,
                       ),
-                    ],
-                  ),
-
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // ====================
-                      // Tombol Edit dimatikan:
-                      // ====================
-                      /*
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WahanaEditScreen(wahana: wahana),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8,
+                              color: Colors.blueAccent,
                             ),
-                          );
-                          refreshData();
-                        },
-                      ),
-                      */
-                      // ====================
-                      // Tombol Hapus dimatikan:
-                      // ====================
-                      /*
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          final confirm = await showDialog<bool>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Konfirmasi'),
-                              content: Text(
-                                'Yakin ingin menghapus data ${wahana.namaWahana ?? "wahana ini"}?',
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Harga : Rp ${wahana.hargaTiket.toStringAsFixed(0)}',
+                                style: TextStyle(fontSize: 15, color: Colors.black87),
                               ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('Batal'),
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                ),
-                                TextButton(
-                                  child: const Text('Hapus'),
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                ),
-                              ],
                             ),
-                          );
-
-                          if (confirm == true) {
-                            final success = await ApiService().deleteWahana(wahana.id);
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Data berhasil dihapus')),
-                              );
-                              refreshData();
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Gagal menghapus data')),
-                              );
-                            }
-                          }
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.circle, size: 8, color: Colors.blueAccent),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Deskripsi : ${wahana.deskripsi}',
+                                style: TextStyle(fontSize: 15, color: Colors.black54),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) => WahanaDetailScreen(wahana: wahana),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(opacity: animation, child: child);
                         },
-                      ),
-                      */
-                    ],
+                      ));
+                    },
+                    trailing: const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent, size: 20),
                   ),
                 ),
               );

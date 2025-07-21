@@ -55,6 +55,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       );
       return;
     }
+    if (usernameController.text.contains(' ')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username tidak boleh mengandung spasi!')),
+      );
+      return;
+    }
     if (!_isEmailValid(emailController.text.trim())) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Format email tidak valid!')),
@@ -64,6 +70,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     if (passwordController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password minimal 6 karakter!')),
+      );
+      return;
+    }
+    if (nohpController.text.isNotEmpty && !RegExp(r'^[0-9]+$').hasMatch(nohpController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nomor HP hanya boleh angka!')),
       );
       return;
     }

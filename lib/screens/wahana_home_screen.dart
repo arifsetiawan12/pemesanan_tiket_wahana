@@ -12,7 +12,13 @@ class WahanaDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(wahana.namaWahana)),
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: Text(wahana.namaWahana),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -185,7 +191,11 @@ class _WahanaHomeScreenState extends State<WahanaHomeScreen> {
                       Navigator.of(context).push(PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) => WahanaDetailScreen(wahana: wahana),
                         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return FadeTransition(opacity: animation, child: child);
+                          final offsetAnimation = Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation);
+                          return SlideTransition(position: offsetAnimation, child: child);
                         },
                       ));
                     },

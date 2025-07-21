@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.32:8000/api';
+  static const String baseUrl = 'http://172.20.10.2/api_laravel_backend/public/api';
 
   // Registrasi Customer
   Future<Map<String, dynamic>> registerCustomer(Customer customer) async {

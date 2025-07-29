@@ -1,13 +1,9 @@
-/// wahana_model.dart
-/// Model data Wahana untuk aplikasi Flutter.
-/// Mencerminkan field pada tabel 'wahanas' di database Laravel.
-
 class Wahana {
   final int id;
   final String kodeWahana;
   final String namaWahana;
   final String deskripsi;
-  final int hargaTiket;
+  final double hargaTiket; // ubah dari int ke double
   final String foto;
 
   Wahana({
@@ -21,12 +17,12 @@ class Wahana {
 
   factory Wahana.fromJson(Map<String, dynamic> json) {
     return Wahana(
-      id: json['id'],
-      kodeWahana: json['kode_wahana'],
-      namaWahana: json['nama_wahana'],
-      deskripsi: json['deskripsi'],
-      hargaTiket: json['harga_tiket'],
-      foto: json['foto'],
+      id: int.tryParse(json['id'].toString()) ?? 0,
+      kodeWahana: json['kode_wahana'] ?? '',
+      namaWahana: json['nama_wahana'] ?? '',
+      deskripsi: json['deskripsi'] ?? '',
+      hargaTiket: double.tryParse(json['harga_tiket'].toString()) ?? 0.0,
+      foto: json['foto'] ?? '',
     );
   }
 }

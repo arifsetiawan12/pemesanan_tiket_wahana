@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../models/customer_model.dart';
 import '../services/api_service.dart';
+import '../models/user_model.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -10,18 +11,17 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController namaController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nohpController = TextEditingController();
   final TextEditingController alamatController = TextEditingController();
   bool isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
-    namaController.dispose();
-    usernameController.dispose();
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     nohpController.dispose();
@@ -31,210 +31,249 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> handleRegister() async {
     setState(() => isLoading = true);
-    final customer = Customer(
-      namacustomer: namaController.text.trim(),
-      username: usernameController.text.trim(),
-      password: passwordController.text,
+
+    final user = User(
+      name: nameController.text.trim(),
       email: emailController.text.trim(),
-      nohp: nohpController.text.trim().isEmpty ? null : nohpController.text.trim(),
-      alamat: alamatController.text.trim().isEmpty ? null : alamatController.text.trim(),
+      password: passwordController.text,
+      nohp:
+          nohpController.text.trim().isEmpty
+              ? null
+              : nohpController.text.trim(),
+      alamat:
+          alamatController.text.trim().isEmpty
+              ? null
+              : alamatController.text.trim(),
+      status: 'customer',
     );
-    print('Mengirim data register...');
+
     try {
-      final success = await ApiService().registerCustomer(customer);
-      print('Register response: $success');
+      final result = await ApiService().registerUser(user);
       setState(() => isLoading = false);
-      if (success) {
-        if (!mounted) return;
+
+      if (!mounted) return;
+
+      if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
         );
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
       } else {
-        if (!mounted) return;
+        final String errorMsg = result['message'] ?? 'Registrasi gagal!';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi gagal! Cek data atau koneksi.')),
+          SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
-      print('Exception registerCustomer: $e');
       setState(() => isLoading = false);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrasi gagal! Cek data atau koneksi.')),
+        const SnackBar(
+          content: Text('Terjadi kesalahan. Silakan coba lagi.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
+  }
+
+  // TextField reusable yang sudah tidak menampilkan garis bawah (underline)
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required Icon icon,
+    String? hint,
+    bool obscure = false,
+    Widget? suffixIcon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          obscureText: obscure,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          decoration: InputDecoration(
+            prefixIcon: icon,
+            suffixIcon: suffixIcon,
+            hintText: hint,
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 16,
+            ),
+
+            // HILANGKAN GARIS BAWAH/OUTLINE
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none, // <- garis bawah dihilangkan
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('Daftar Akun'),
+        centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.blue),
+        foregroundColor: Colors.blue,
       ),
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    'Daftar',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
+                  'Buat Akun Baru',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
                 ),
-                const SizedBox(height: 32),
-                // Nama Customer
-                const Text('Nama Customer'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: namaController,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.person, color: Colors.blue),
-                    hintText: 'Nama Customer',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
+              ),
+              const SizedBox(height: 24),
+
+              // Field Nama
+              buildTextField(
+                controller: nameController,
+                label: 'Nama Lengkap',
+                icon: const Icon(Icons.person, color: Colors.blue),
+                hint: 'Nama lengkap Anda',
+              ),
+
+              // Field Email
+              buildTextField(
+                controller: emailController,
+                label: 'Email',
+                icon: const Icon(Icons.email, color: Colors.blue),
+                hint: 'Email aktif',
+                keyboardType: TextInputType.emailAddress,
+              ),
+
+              // Field Password
+              buildTextField(
+                controller: passwordController,
+                label: 'Password',
+                icon: const Icon(Icons.lock, color: Colors.blue),
+                hint: 'Masukkan password',
+                obscure: _obscurePassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
                   ),
+                  onPressed:
+                      () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                 ),
-                const SizedBox(height: 16),
-                // Username
-                const Text('Username'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.account_circle, color: Colors.purple),
-                    hintText: 'Username',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+
+              // Field No HP
+              buildTextField(
+                controller: nohpController,
+                label: 'Nomor HP',
+                icon: const Icon(Icons.phone, color: Colors.blue),
+                hint: 'Opsional',
+                keyboardType: TextInputType.phone,
+              ),
+
+              // Field Alamat
+              buildTextField(
+                controller: alamatController,
+                label: 'Alamat Lengkap',
+                icon: const Icon(Icons.home, color: Colors.blue),
+                hint: 'Opsional',
+                maxLines: 2,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Tombol Daftar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : handleRegister,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 2,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
+                    backgroundColor: Colors.blue,
                   ),
-                ),
-                const SizedBox(height: 16),
-                // Email
-                const Text('Email'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.email, color: Colors.blue),
-                    hintText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Password
-                const Text('Password'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.lock, color: Colors.blue),
-                    hintText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Nomor HP (nullable)
-                const Text('Nomor HP'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nohpController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.phone, color: Colors.green),
-                    hintText: 'Nomor HP (opsional)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Alamat (nullable)
-                const Text('Alamat'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: alamatController,
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.home, color: Colors.orange),
-                    hintText: 'Alamat (opsional)',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // Tombol Daftar
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    onPressed: isLoading ? null : handleRegister,
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child:
+                      isLoading
+                          ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
                           )
-                        : const Text(
-                            'Daftar',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.app_registration, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Daftar',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
-                  ),
                 ),
-                const SizedBox(height: 16),
-                // Link Masuk
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Sudah punya akun? '),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                      child: const Text(
-                        'Masuk sini',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Link Login
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Sudah punya akun?'),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    onTap:
+                        () => Navigator.pushReplacementNamed(context, '/login'),
+                    child: const Text(
+                      'Masuk di sini',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+            ],
           ),
         ),
       ),
     );
   }
-} 
+}

@@ -31,8 +31,13 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.6
+  http_parser: ^4.0.2
   image_picker: ^0.8.7
   shared_preferences: ^2.2.2
+  intl: ^0.18.1
+  pdf: ^3.10.4
+  printing: ^5.11.0
+  flutter_launcher_icons: ^0.14.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -49,6 +54,11 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+flutter_launcher_icons:
+  android: true # <--- ganti dengan nama icon kamu
+  ios: false
+  image_path: "assets/images/logo.png" # <--- ganti dengan path icon kamu
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -59,18 +69,11 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
-  assets:
-    - assets/images/adventure_park.png
-    - assets/images/facebook.png
-    - assets/images/google.png
-    - assets/images/user.png
-    - assets/images/email.png
-    - assets/images/lock.png
+  
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

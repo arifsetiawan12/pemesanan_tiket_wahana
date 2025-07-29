@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
+        '/': (context) => const OnboardingScreen(),
+        '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => WahanaHomeScreen(),
       },

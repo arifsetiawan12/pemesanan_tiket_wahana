@@ -14,7 +14,7 @@ import 'package:image_picker/image_picker.dart';
 
 class ApiService {
   static const String baseUrl =
-      'http://192.168.43.144/api_laravel_backend/public/api';
+      'http://172.20.10.2/api_laravel_backend/public/api';
 
   /// Fungsi login dengan header Accept: application/json agar tidak error FormatException
   Future<Map<String, dynamic>> login(String name, String password) async {
@@ -198,7 +198,7 @@ class ApiService {
     }
 
     try {
-      final uri = Uri.parse('http://192.168.43.144:8000/api/pemesanan');
+      final uri = Uri.parse('http://172.20.10.2:8000/api/pemesanan');
       final request =
           http.MultipartRequest('POST', uri)
             ..headers['Authorization'] = 'Bearer $token'

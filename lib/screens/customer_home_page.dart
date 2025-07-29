@@ -393,59 +393,90 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Informasi Wahana',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.map,
-                                size: 20,
-                                color: Colors.green[700],
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Area : Zona Petualangan',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.schedule,
-                                size: 20,
-                                color: Colors.deepPurple,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Buka : 09.00 - 17.00',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+  padding: const EdgeInsets.symmetric(horizontal: 12),
+  child: Card(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Informasi Wahana',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(
+                Icons.map,
+                size: 20,
+                color: Colors.green[700],
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Area : Zona Petualangan',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(
+                Icons.schedule,
+                size: 20,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Buka : 09.00 - 17.00',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(
+                Icons.attach_money,
+                size: 20,
+                color: Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Harga Tiket : Rp25.000',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(
+                Icons.child_care,
+                size: 20,
+                color: Colors.redAccent,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Batas Usia : 5+ tahun',
+                style: TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+),
+                const SizedBox(height: 20),
+              ],  
             ),
           ),
         ],
